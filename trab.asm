@@ -386,10 +386,14 @@ MultiplyMatrices:
     #generalizando $a2 = a0*(3*4+indice1) e $a3 = a1*(3*4+indice1)
     #comeca no 0x10040012
 
+    lui $t0, 0x1004    # Carrega os 16 bits mais significativos do endereço
+    ori $t0, $t0, 0x0000   # Realiza uma operação OR com os 16 bits menos significativos do endereço
 
     sll $t1, $t1, 2 
     add $t0, $t0, $t1 
 
+    mul $t1,$a1, 4
+    add $t0 ,$t0, $t1
     lw $t2, ($t0)
 
 
