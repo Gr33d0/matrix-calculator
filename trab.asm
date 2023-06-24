@@ -22,8 +22,8 @@ IndexInvalido_msg: .asciiz "Index invalido.\n\n"
 
 Matriz1: .asciiz "Index da primeira matriz: "
 Matriz2: .asciiz "Index da segunda matriz: "
-NaoMult: .asciiz "Matrizes nao multiplicaveis.\n\n"
-Multiplicado: .asciiz "Matrizes multiplicadas com sucesso.\n\n"
+NaoMult_msg: .asciiz "Matrizes nao multiplicaveis.\n\n"
+Multiplicado_msg: .asciiz "Matrizes multiplicadas com sucesso.\n\n"
 
 .text
 .globl main
@@ -31,10 +31,10 @@ Multiplicado: .asciiz "Matrizes multiplicadas com sucesso.\n\n"
 .globl InserirMatriz
 .globl ListarMatrizes
 .globl ApagarMatriz
-.globl MultiplyMatrices
+.globl MultiplicarMatrizes
 .globl PrintMatriz
 
-  main:
+main:
     li $s2, 4
     la $s0, Matrizes
     li $v0, 4 
@@ -48,12 +48,12 @@ Multiplicado: .asciiz "Matrizes multiplicadas com sucesso.\n\n"
     beq $t0, 1, InserirMatriz 
     beq $t0, 2, MenuListar
     beq $t0, 3, ApagarMatriz 
-    beq $t0, 4, MultiplyMatrices 
+    beq $t0, 4, MultiplicarMatrizes 
     beq $t0, 5, exit 
     
     j main
     
-    MenuListar:
+MenuListar:
     addi $sp, $sp, -4
     sw $ra, 0($sp)
     jal ListarMatrizes
@@ -64,7 +64,7 @@ Multiplicado: .asciiz "Matrizes multiplicadas com sucesso.\n\n"
    
                                      ### INSERIR MATRIZ ###
 
- InserirMatriz:
+InserirMatriz:
 
  #Limpar registradores
   li $t0, 0
@@ -136,7 +136,7 @@ Multiplicado: .asciiz "Matrizes multiplicadas com sucesso.\n\n"
   j main
  
  
-  LoopElementos:
+LoopElementos:
   beq $t1, $a0, FimElementos
   li $v0, 4        		# Imprimir prompt para o elemento atual
   la $a0, elemento
@@ -152,7 +152,7 @@ Multiplicado: .asciiz "Matrizes multiplicadas com sucesso.\n\n"
   addi $t1, $t1, 4
   j LoopElementos
   
-  FimElementos:
+FimElementos:
   li $v0, 4            		# Imprimir mensagem de sucesso
   la $a0, successo
   syscall
@@ -171,7 +171,7 @@ Multiplicado: .asciiz "Matrizes multiplicadas com sucesso.\n\n"
   jr $ra
   
   #############################################         FIM INSERIR          ################################
-  ListarMatrizes:
+ListarMatrizes:
   lw $t0, 0($s0)
   beq $t0, $0, SemMatrizes
   move $v1, $t0
@@ -181,7 +181,7 @@ Multiplicado: .asciiz "Matrizes multiplicadas com sucesso.\n\n"
   li $t8, 1
   li $a0, 40			# bytes do array de enderecos -> $a0
   
-  ListarEnderecos:
+ListarEnderecos:
   li $a0, 40
   li $t1, 0
   beq $t0, $a0, FimMatrizes 	#Se array cheio e lista terminar
@@ -198,7 +198,7 @@ Multiplicado: .asciiz "Matrizes multiplicadas com sucesso.\n\n"
   addi $t0, $t0, 4
   j ListarEnderecos
   
-  SemMatrizes:
+SemMatrizes:
   li $v0, 4 
   la $a0, Vazio 
   syscall 
@@ -357,49 +357,40 @@ IndexInvalido:
     j main
     
 
-MultiplyMatrices:
-    #listar matrizes
+MultiplicarMatrizes:
     addi $sp, $sp, -4
-	sw $ra, 0($sp)
-	jal ListarMatrizes
-	lw $ra, 0($sp)
-	addi $sp, $sp, 4
-    #Primeiro escolher matrizes
-    li $v0, 4		
-	la $a0, Matriz1
-	syscall	
+    sw $ra, 0($sp)
+    jal ListarMatrizes
+    lw $ra, 0($sp)
+    addi $sp, $sp, 4
 
+    #beq $v1, $0 FimMultiplicar
+
+    # Matriz 1
+    li $v0, 4
+    la $a0, Matriz1
+    syscall
     li $v0, 5
     syscall
-    move $a0, $v0   # Move o valor lido para $a0
+    move $t0, $v0 # Matriz 1 -> $t0
+    li $v0, 4
+    la $a0, paragrafo
+    syscall
 
+
+    # Matriz 2
     li $v0, 4
     la $a0, Matriz2
     syscall
-    
     li $v0, 5
     syscall
-    move $a1, $v0   # Move o valor lido para $a1
+    move $t1, $v0 # Matriz 2 -> $t1
+    li $v0, 4
+    la $a0, paragrafo
+    syscall
 
-    #Saber se encontrou oque queria
-    #3 atributos + numero elementos (EX: se for 1 é os 3 primeiros + numeros de elementos)
-    #generalizando $a2 = a0*(3*4+indice1) e $a3 = a1*(3*4+indice1)
-    #comeca no 0x10040012
+ProcurarMatriz:
 
-    lui $t0, 0x1004    # Carrega os 16 bits mais significativos do endereço
-    ori $t0, $t0, 0x0000   # Realiza uma operação OR com os 16 bits menos significativos do endereço
-
-    sll $t1, $t1, 2 
-    add $t0, $t0, $t1 
-
-    mul $t1,$a1, 4
-    add $t0 ,$t0, $t1
-    lw $t2, ($t0)
-
-
-
-
-
-
+    la $t2, 0x10040000
 
 
