@@ -3,6 +3,8 @@ Matrizes: .space 40 			# 100 bytes para cada matriz, up to 4 matrices
 
 
 .data
+resultMsg: .asciiz "Valor encontrado no endereço: "
+searchValue: .word 3
 
 menu: .asciiz "Menu:\n1 - Inserir\n2 - Listar\n3 - Apagar\n4 - Multiplicar\n5 - Sair\n\nInsira a opcao: "
 
@@ -391,6 +393,46 @@ MultiplicarMatrizes:
 
 ProcurarMatriz:
 
-    la $t2, 0x10040000
+  # Carrega o endereço do array
+  li $s0, 0x10040000
+  # Carrega o valor procurado
+  lw $s1, searchValue
+  # Carrega o tamanho do array
+  lw $t2, Matrizes
+  # Inicializa o contador de loop
+  li $t3, 0
 
+loop:
+  # Verifica se o contador atingiu o tamanho do array
+  bge $t3, $t2, end
 
+  # Carrega o valor atual do array
+  lw $t4, ($s0)
+  # Compara o valor atual com o valor procurado
+  beq $t4, $s1, found
+
+  # Incrementa o contador
+  addi $t3, $t3, 1
+  # Incrementa o endereço do array
+  addi $s0, $s0, 4
+  # Volta para o início do loop
+  j loop
+
+found:
+  # O valor foi encontrado
+  # O endereço do valor está em $s0
+
+  # Imprime a mensagem inicial
+  li $v0, 4
+  la $a0, resultMsg
+  syscall
+
+  # Imprime o endereço encontrado
+  li $v0, 1
+  move $a0, $s0
+  syscall
+
+end:
+  # Fim do programa
+  # Coloque aqui o código de término do programa
+  
